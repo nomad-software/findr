@@ -61,9 +61,7 @@ func (this *Handler) matchPath(fullPath string) {
 	}
 }
 
-func (this *Handler) compile(pattern string) *regexp.Regexp {
-	var regex *regexp.Regexp
-
+func (this *Handler) compile(pattern string) (regex *regexp.Regexp) {
 	if this.Options.Case {
 		regex, _ = regexp.Compile(pattern)
 	} else {

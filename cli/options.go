@@ -78,9 +78,7 @@ func (this *Options) Usage() {
 	flag.Usage()
 }
 
-func (this *Options) compiles(pattern string) error {
-	var err error
-
+func (this *Options) compiles(pattern string) (err error) {
 	if this.Case {
 		_, err = regexp.Compile(pattern)
 	} else {
