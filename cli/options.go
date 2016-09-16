@@ -11,31 +11,31 @@ import (
 )
 
 type Options struct {
-	Dir     string
-	Pattern string
-	Ignore  string
 	Case    bool
+	Dir     string
+	File    string
 	Help    bool
+	Ignore  string
+	Pattern string
 }
 
-func (this *Options) Parse() {
-	flag.StringVar(&this.Dir, "dir", ".", "The directory to traverse.")
-	flag.StringVar(&this.Pattern, "pattern", "", "The regex to match files against.")
-	flag.StringVar(&this.Ignore, "ignore", "", "A regex to ignore files or directories.")
-	flag.BoolVar(&this.Case, "case", false, "Use to switch to case sensitive matching.")
-	flag.BoolVar(&this.Help, "help", false, "Show help.")
+func ParseOptions() Options {
+	var opt Options
+
+	flag.BoolVar(&opt.Case, "case", false, "Use to switch to case sensitive pattern matching.")
+	flag.StringVar(&opt.Dir, "dir", ".", "The directory to traverse.")
+	flag.StringVar(&opt.File, "file", "*", "The glob file pattern to match.")
+	flag.BoolVar(&opt.Help, "help", false, "Show help.")
+	flag.StringVar(&opt.Ignore, "ignore", "", "A regex to ignore files or directories.")
+	flag.StringVar(&opt.Pattern, "pattern", ".*", "A regex to match files against.")
 	flag.Parse()
 
-	dir, _ := homedir.Expand(this.Dir)
-	this.Dir = dir
+	opt.Dir, _ = homedir.Expand(opt.Dir)
+
+	return opt
 }
 
 func (this *Options) Valid() bool {
-
-	if this.Pattern == "" {
-		fmt.Fprintln(os.Stderr, color.RedString("A pattern must be defined."))
-		return false
-	}
 
 	err := this.compiles(this.Pattern)
 	if err != nil {
@@ -53,17 +53,28 @@ func (this *Options) Valid() bool {
 }
 
 func (this *Options) Echo() {
-	options := color.CyanString("finding:     ")
-	options += color.GreenString("%s\n", this.Pattern)
-	options += color.CyanString("starting in: ")
-	options += color.GreenString("%s\n", this.Dir)
 
-	if this.Ignore != "" {
-		options += color.CyanString("ignoring:    ")
-		options += color.GreenString("%s\n", this.Ignore)
+	var output string
+
+	if this.Pattern != ".*" {
+		output += color.CyanString("finding:     ")
+		output += color.GreenString("%s\n", this.Pattern)
 	}
 
-	fmt.Print(options)
+	if this.File != "*" {
+		output += color.CyanString("files:       ")
+		output += color.GreenString("%s\n", this.File)
+	}
+
+	output += color.CyanString("starting in: ")
+	output += color.GreenString("%s\n", this.Dir)
+
+	if this.Ignore != "" {
+		output += color.CyanString("ignoring:    ")
+		output += color.GreenString("%s\n", this.Ignore)
+	}
+
+	fmt.Print(output)
 }
 
 func (this *Options) Usage() {

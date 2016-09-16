@@ -7,11 +7,11 @@ import (
 )
 
 type Output struct {
-	Console chan string
 	Closed  chan bool
+	Console chan string
 }
 
-func (this *Output) Process() {
+func (this *Output) Start() {
 	var total int
 	for path := range this.Console {
 		total++
@@ -19,4 +19,9 @@ func (this *Output) Process() {
 	}
 	fmt.Printf("Found %d file(s)\n", total)
 	this.Closed <- true
+}
+
+func (this *Output) Stop() {
+	close(this.Console)
+	<-this.Closed
 }
