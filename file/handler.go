@@ -47,7 +47,7 @@ func (this *Handler) Walk() error {
 			return err
 		}
 
-		if info.IsDir() {
+		if info.IsDir() || !info.Mode().IsRegular() {
 			return nil
 		}
 
