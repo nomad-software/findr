@@ -24,7 +24,7 @@ func NewHandler(options *cli.Options) Handler {
 	var handler Handler
 
 	handler.Options = options
-	handler.Pattern = handler.compile(options.Pattern)
+	handler.Pattern = handler.compile(options.Regex)
 
 	if handler.Options.Ignore != "" {
 		handler.Ignore = handler.compile(handler.Options.Ignore)
@@ -70,7 +70,7 @@ func (this *Handler) matchPath(fullPath string) {
 		return
 	}
 
-	matched, err := filepath.Match(this.Options.File, path.Base(fullPath))
+	matched, err := filepath.Match(this.Options.Glob, path.Base(fullPath))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, color.RedString(err.Error()))
 		return

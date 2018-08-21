@@ -17,12 +17,12 @@ const (
 )
 
 type Options struct {
-	Case    bool
-	Dir     string
-	File    string
-	Help    bool
-	Ignore  string
-	Pattern string
+	Case   bool
+	Dir    string
+	Glob   string
+	Help   bool
+	Ignore string
+	Regex  string
 }
 
 func ParseOptions() Options {
@@ -30,10 +30,10 @@ func ParseOptions() Options {
 
 	flag.BoolVar(&opt.Case, "case", false, "Use to switch to case sensitive pattern matching.")
 	flag.StringVar(&opt.Dir, "dir", DEFAULT_DIRECTORY, "The directory to traverse.")
-	flag.StringVar(&opt.File, "file", DEFAULT_GLOB, "The glob file pattern to match.")
+	flag.StringVar(&opt.Glob, "glob", DEFAULT_GLOB, "The glob file pattern to match.")
 	flag.BoolVar(&opt.Help, "help", false, "Show help.")
 	flag.StringVar(&opt.Ignore, "ignore", "", "A regex to ignore files or directories.")
-	flag.StringVar(&opt.Pattern, "pattern", DEFAULT_REGEX, "A regex to match files against.")
+	flag.StringVar(&opt.Regex, "regex", DEFAULT_REGEX, "A regex to match files against.")
 	flag.Parse()
 
 	opt.Dir, _ = homedir.Expand(opt.Dir)
@@ -43,7 +43,7 @@ func ParseOptions() Options {
 
 func (this *Options) Valid() bool {
 
-	err := this.compiles(this.Pattern)
+	err := this.compiles(this.Regex)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, color.RedString("find pattern: %s", err.Error()))
 		return false
