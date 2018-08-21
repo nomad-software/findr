@@ -58,31 +58,6 @@ func (this *Options) Valid() bool {
 	return true
 }
 
-func (this *Options) Echo() {
-
-	var output string
-
-	if this.Pattern != DEFAULT_REGEX {
-		output += color.CyanString("finding:     ")
-		output += color.GreenString("%s\n", this.Pattern)
-	}
-
-	if this.File != DEFAULT_GLOB {
-		output += color.CyanString("files:       ")
-		output += color.GreenString("%s\n", this.File)
-	}
-
-	output += color.CyanString("starting in: ")
-	output += color.GreenString("%s\n", this.Dir)
-
-	if this.Ignore != "" {
-		output += color.CyanString("ignoring:    ")
-		output += color.GreenString("%s\n", this.Ignore)
-	}
-
-	fmt.Print(output)
-}
-
 func (this *Options) Usage() {
 	var banner string = `_____ _           _
 |  ___(_)_ __   __| |_ __

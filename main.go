@@ -18,7 +18,6 @@ func main() {
 
 	} else if options.Valid() {
 		file := file.NewHandler(&options)
-		options.Echo()
 
 		err := file.Walk()
 		if err != nil {
