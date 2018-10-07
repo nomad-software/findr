@@ -4,6 +4,15 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-colorable"
+)
+
+var (
+	// Stdout is a color friendly pipe.
+	Stdout = colorable.NewColorableStdout()
+
+	// Stderr is a color friendly pipe.
+	Stderr = colorable.NewColorableStderr()
 )
 
 type Output struct {

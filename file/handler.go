@@ -72,7 +72,7 @@ func (this *Handler) matchPath(fullPath string) {
 
 	matched, err := filepath.Match(this.Options.Glob, path.Base(fullPath))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, color.RedString(err.Error()))
+		fmt.Fprintln(cli.Stderr, color.RedString(err.Error()))
 		return
 	}
 

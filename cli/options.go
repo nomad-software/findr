@@ -3,7 +3,6 @@ package cli
 import (
 	"flag"
 	"fmt"
-	"os"
 	"regexp"
 
 	"github.com/fatih/color"
@@ -45,13 +44,13 @@ func (this *Options) Valid() bool {
 
 	err := this.compiles(this.Regex)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, color.RedString("find pattern: %s", err.Error()))
+		fmt.Fprintln(Stderr, color.RedString("find pattern: %s", err.Error()))
 		return false
 	}
 
 	err = this.compiles(this.Ignore)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, color.RedString("ignore pattern: %s", err.Error()))
+		fmt.Fprintln(Stderr, color.RedString("ignore pattern: %s", err.Error()))
 		return false
 	}
 
