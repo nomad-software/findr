@@ -8,11 +8,11 @@ import (
 	"regexp"
 	"sync"
 
-	"github.com/fatih/color"
 	"github.com/nomad-software/findr/cli"
 )
 
-type Handler struct {
+// Walker is the main file walker, it coordinates matching options and the path queue.
+type Walker struct {
 	Group   sync.WaitGroup
 	Ignore  *regexp.Regexp
 	Options *cli.Options
@@ -20,28 +20,31 @@ type Handler struct {
 	Pattern *regexp.Regexp
 }
 
-func NewHandler(options *cli.Options) Handler {
-	var handler Handler
+// NewWalker creates a new file walker.
+func NewWalker(opt *cli.Options) Walker {
+	var w Walker
 
-	handler.Options = options
-	handler.Pattern = handler.compile(options.Regex)
+	w.Options = opt
+	w.Pattern = w.compile(opt.Regex)
 
-	if handler.Options.Ignore != "" {
-		handler.Ignore = handler.compile(handler.Options.Ignore)
+	if w.Options.Ignore != "" {
+		w.Ignore = w.compile(w.Options.Ignore)
 	}
 
-	handler.Output = &cli.Output{
+	w.Output = &cli.Output{
 		Console: make(chan string),
 		Closed:  make(chan bool),
 	}
 
-	return handler
+	return w
 }
 
-func (this *Handler) Walk() error {
-	go this.Output.Start()
+// Walk starts walking through the directory specified in the options and starts
+// processing any matched files.
+func (w *Walker) Walk() error {
+	go w.Output.Start()
 
-	err := filepath.Walk(this.Options.Dir, func(fullPath string, info os.FileInfo, err error) error {
+	err := filepath.Walk(w.Options.Dir, func(fullPath string, info os.FileInfo, err error) error {
 
 		if err != nil {
 			return err
@@ -51,38 +54,40 @@ func (this *Handler) Walk() error {
 			return nil
 		}
 
-		this.Group.Add(1)
-		go this.matchPath(fullPath)
+		w.Group.Add(1)
+		go w.matchPath(fullPath)
 
 		return nil
 	})
 
-	this.Group.Wait()
-	this.Output.Stop()
+	w.Group.Wait()
+	w.Output.Stop()
 
 	return err
 }
 
-func (this *Handler) matchPath(fullPath string) {
-	defer this.Group.Done()
+// matchPath matches paths and passed them to be output.
+func (w *Walker) matchPath(fullPath string) {
+	defer w.Group.Done()
 
-	if this.Ignore != nil && this.Ignore.MatchString(fullPath) {
+	if w.Ignore != nil && w.Ignore.MatchString(fullPath) {
 		return
 	}
 
-	matched, err := filepath.Match(this.Options.Glob, path.Base(fullPath))
+	matched, err := filepath.Match(w.Options.Glob, path.Base(fullPath))
 	if err != nil {
-		fmt.Fprintln(cli.Stderr, color.RedString(err.Error()))
+		fmt.Println(err.Error())
 		return
 	}
 
-	if matched && this.Pattern.MatchString(fullPath) {
-		this.Output.Console <- fullPath
+	if matched && w.Pattern.MatchString(fullPath) {
+		w.Output.Console <- fullPath
 	}
 }
 
-func (this *Handler) compile(pattern string) (regex *regexp.Regexp) {
-	if this.Options.Case {
+// Check that a regex pattern compiles.
+func (w *Walker) compile(pattern string) (regex *regexp.Regexp) {
+	if w.Options.Case {
 		regex, _ = regexp.Compile(pattern)
 	} else {
 		regex, _ = regexp.Compile("(?i)" + pattern)
