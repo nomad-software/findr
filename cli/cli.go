@@ -14,7 +14,7 @@ const (
 	defaultGlob      = "*"
 )
 
-// Options contains CLI arguments passed to the program.
+// Options contain the command line options passed to the program.
 type Options struct {
 	Case   bool
 	Dir    string
@@ -24,9 +24,8 @@ type Options struct {
 	Regex  string
 }
 
-// ParseOptions parses the command line options and returns a struct filled with
-// the relevant options.
-func ParseOptions() Options {
+// ParseOptions parses the command line options.
+func ParseOptions() *Options {
 	var opt Options
 
 	flag.BoolVar(&opt.Case, "case", false, "Use to switch to case sensitive pattern matching.")
@@ -39,20 +38,18 @@ func ParseOptions() Options {
 
 	opt.Dir, _ = homedir.Expand(opt.Dir)
 
-	return opt
+	return &opt
 }
 
 // Valid checks command line options are valid.
 func (opt *Options) Valid() bool {
 
-	err := opt.compiles(opt.Regex)
-	if err != nil {
+	if err := compile(opt.Regex, opt.Case); err != nil {
 		fmt.Printf("find pattern: %s", err.Error())
 		return false
 	}
 
-	err = opt.compiles(opt.Ignore)
-	if err != nil {
+	if err := compile(opt.Ignore, opt.Case); err != nil {
 		fmt.Printf("ignore pattern: %s", err.Error())
 		return false
 	}
@@ -60,22 +57,9 @@ func (opt *Options) Valid() bool {
 	return true
 }
 
-// PrintUsage prints the usage of the program.
-func (opt *Options) PrintUsage() {
-	var banner string = `_____ _           _
-|  ___(_)_ __   __| |_ __
-| |_  | | '_ \ / _' | '__|
-|  _| | | | | | (_| | |
-|_|   |_|_| |_|\__,_|_|
-
-`
-	fmt.Println(banner)
-	flag.Usage()
-}
-
-// Check that a regex pattern compiles.
-func (opt *Options) compiles(pattern string) (err error) {
-	if opt.Case {
+// compile checks that a regex pattern compiles.
+func compile(pattern string, observeCase bool) (err error) {
+	if observeCase {
 		_, err = regexp.Compile(pattern)
 	} else {
 		_, err = regexp.Compile("(?i)" + pattern)

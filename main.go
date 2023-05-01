@@ -1,22 +1,22 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/nomad-software/findr/cli"
-	"github.com/nomad-software/findr/file"
+	"github.com/nomad-software/findr/file/walker"
 )
 
 func main() {
 	options := cli.ParseOptions()
 
 	if options.Help {
-		options.PrintUsage()
+		flag.Usage()
 
 	} else if options.Valid() {
-		file := file.NewWalker(&options)
+		err := walker.New(options).Walk()
 
-		err := file.Walk()
 		if err != nil {
 			fmt.Println(err.Error())
 			return
